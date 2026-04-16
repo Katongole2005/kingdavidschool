@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     // ----- ACTIVE LINK (already in main.js, but kept for safety) -----
-    const currentPath = window.location.pathname.split("/").pop() || "index.php";
+    const currentPath = window.location.pathname.split("/").pop() || "index.html";
     document.querySelectorAll(".nav__link").forEach(link => {
         const linkPath = decodeURIComponent(link.getAttribute("href"));
         if (linkPath === currentPath) {
@@ -10,24 +10,42 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // ----- SCROLL REVEAL for hexagons and timeline -----
+    let revealedElements = new Set();
+    
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
+            if (entry.isIntersecting && !revealedElements.has(entry.target)) {
                 entry.target.classList.add("visible");
+                revealedElements.add(entry.target);
                 observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.3 });
+    }, { threshold: 0.1 });
 
-    document.querySelectorAll(".hex-item").forEach(el => observer.observe(el));
-    document.querySelectorAll(".tree-timeline__item").forEach(el => observer.observe(el));
+    // Observe all animation elements
+    document.querySelectorAll(".hex-item, .tree-timeline__item").forEach(el => {
+        observer.observe(el);
+    });
 
-    // ----- FALLBACK: Show everything after 1 second if observer fails -----
+    // ----- FALLBACK: Show everything if observer doesn't trigger -----
+    // First fallback at 800ms for faster connections
     setTimeout(() => {
         document.querySelectorAll(".hex-item, .tree-timeline__item").forEach(el => {
-            el.classList.add("visible");
+            if (!revealedElements.has(el)) {
+                el.classList.add("visible");
+                revealedElements.add(el);
+            }
         });
-    }, 1000);
+    }, 800);
+
+    // Second fallback at 2 seconds for slower connections
+    setTimeout(() => {
+        document.querySelectorAll(".hex-item, .tree-timeline__item").forEach(el => {
+            if (!el.classList.contains("visible")) {
+                el.classList.add("visible");
+            }
+        });
+    }, 2000);
 
     // ----- COUNT-UP ANIMATION -----
     const countObserver = new IntersectionObserver((entries) => {
