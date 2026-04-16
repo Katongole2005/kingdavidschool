@@ -189,7 +189,7 @@ function initMobileMenu() {
      * Additional check for current page
      */
     function initActiveLink() {
-        const currentPath = window.location.pathname.split('/').pop() || 'index.php';
+        const currentPath = window.location.pathname.split('/').pop() || 'index.html';
         
         document.querySelectorAll('.nav__link').forEach(link => {
             const linkPath = link.getAttribute('href');

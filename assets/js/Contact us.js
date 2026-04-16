@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     // ----- ACTIVE LINK (fallback, but main.js also does this) -----
-    const currentPath = window.location.pathname.split("/").pop() || "index.php";
+    const currentPath = window.location.pathname.split("/").pop() || "index.html";
     document.querySelectorAll(".nav__link").forEach(link => {
         const linkPath = decodeURIComponent(link.getAttribute("href"));
         if (linkPath === currentPath) {
