@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function createGalleryItem(img, index) {
-    const path = 'assets/images/' + (img.folder || '') + img.filename;
+    const path = 'https://pub-05955d1747df4f86b7854058d3ab270b.r2.dev/images/' + (img.folder || '') + img.filename;
     const item = document.createElement('div');
     item.className = 'gallery-item';
     item.setAttribute('data-category', img.category);
