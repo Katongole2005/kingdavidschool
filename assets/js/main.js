@@ -14,6 +14,7 @@
         initSmoothScroll();
         initActiveLink();
         initLazyLoading();
+        registerServiceWorker();
     });
 
     /**
@@ -251,6 +252,24 @@ function initMobileMenu() {
                 element.textContent = Math.floor(current).toLocaleString();
             }
         }, 16);
+    }
+
+    /**
+     * Service Worker Registration
+     * Enables offline caching and improved performance
+     */
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/assets/js/service-worker.js')
+                .then(registration => {
+                    console.log('✓ Service Worker registered');
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+    }
+})();
     };
 
     /**
