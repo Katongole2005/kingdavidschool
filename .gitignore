@@ -1,0 +1,23 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor folders
+.vscode/
+
+# PHP and web server
+*.log
+*.env
+
+# Dependency folders
+node_modules/
+vendor/
+
+# Mac metadata
+.Spotlight-V100/
+.Trashes/
+
+# Temporary files
+*.tmp
+*.cache
