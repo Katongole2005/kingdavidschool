@@ -54,6 +54,28 @@ main {
   transform-origin: center;
 }
 
+.gallery-grid {
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
+}
+
+.gallery-item {
+  content-visibility: auto;
+  contain: layout paint style;
+  contain-intrinsic-size: 360px 300px;
+}
+
+.gallery-image {
+  background: linear-gradient(135deg, rgba(139, 30, 30, 0.08), rgba(244, 197, 66, 0.16));
+  overflow: hidden;
+}
+
+.gallery-image img,
+.gallery-hero__image img,
+.lightbox-content img {
+  image-rendering: auto;
+}
+
 .program-card,
 .feature-card,
 .vision-card,

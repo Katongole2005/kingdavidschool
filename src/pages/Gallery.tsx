@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { ASSET_BASE } from '../constants';
 import { galleryCategories, galleryImages, galleryImageUrl, type GalleryImage } from '../data/gallery';
 
 const ITEMS_PER_PAGE = 12;
+const PRIORITY_IMAGE_COUNT = 6;
 
 type GalleryFilter = (typeof galleryCategories)[number]['key'];
 
@@ -49,14 +50,26 @@ const videos = [
   },
 ];
 
-function GalleryCard({ image, index, onOpen }: { image: GalleryImage; index: number; onOpen: (index: number) => void }) {
+const GalleryCard = memo(function GalleryCard({ image, index, onOpen }: { image: GalleryImage; index: number; onOpen: (index: number) => void }) {
   const categoryLabel = image.category.charAt(0).toUpperCase() + image.category.slice(1);
+  const isPriority = index < PRIORITY_IMAGE_COUNT;
 
   return (
     <button className="gallery-item" data-category={image.category} data-index={index} type="button" onClick={() => onOpen(index)}>
       <div className="gallery-category">{categoryLabel}</div>
       <div className="gallery-image">
-        <img src={galleryImageUrl(image)} alt={image.title} data-title={image.title} data-date={image.date} width="400" height="300" loading="lazy" />
+        <img
+          src={galleryImageUrl(image)}
+          alt={image.title}
+          data-title={image.title}
+          data-date={image.date}
+          width="400"
+          height="300"
+          loading={isPriority ? 'eager' : 'lazy'}
+          fetchPriority={isPriority ? 'high' : 'low'}
+          decoding="async"
+          sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 30vw"
+        />
       </div>
       <div className="gallery-overlay">
         <h3>{image.title}</h3>
@@ -68,7 +81,7 @@ function GalleryCard({ image, index, onOpen }: { image: GalleryImage; index: num
       </div>
     </button>
   );
-}
+});
 
 export function Gallery() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -84,7 +97,11 @@ export function Gallery() {
     return galleryImages.filter((image) => image.category === currentFilter);
   }, [currentFilter]);
 
-  const visibleImages = filteredImages.slice(0, currentPage * ITEMS_PER_PAGE);
+  const visibleImages = useMemo(() => filteredImages.slice(0, currentPage * ITEMS_PER_PAGE), [currentPage, filteredImages]);
+  const nextPageImages = useMemo(
+    () => filteredImages.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE),
+    [currentPage, filteredImages],
+  );
   const lightboxImage = lightboxIndex === null ? null : filteredImages[lightboxIndex];
   const totalVisible = Math.min(currentPage * ITEMS_PER_PAGE, filteredImages.length);
 
@@ -120,6 +137,28 @@ export function Gallery() {
     videoRef.current.play().catch(() => undefined);
   }, [activeVideo]);
 
+  useEffect(() => {
+    if (!nextPageImages.length) return;
+
+    const preloadImages = () => {
+      nextPageImages.forEach((image) => {
+        const preloadImage = new Image();
+        preloadImage.decoding = 'async';
+        preloadImage.loading = 'lazy';
+        preloadImage.src = galleryImageUrl(image);
+        preloadImage.decode?.().catch(() => undefined);
+      });
+    };
+
+    const idleCallback = window.requestIdleCallback?.(preloadImages, { timeout: 2500 });
+    if (!idleCallback) {
+      const timeoutId = window.setTimeout(preloadImages, 1000);
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    return () => window.cancelIdleCallback?.(idleCallback);
+  }, [nextPageImages]);
+
   const closeVideo = () => {
     videoRef.current?.pause();
     setActiveVideo(null);
@@ -130,7 +169,15 @@ export function Gallery() {
       <main id="main">
         <section className="gallery-hero visible">
           <div className="gallery-hero__image">
-            <img src={`${ASSET_BASE}/images/Gallery1.webp`} alt="School life" width="1600" height="900" loading="eager" fetchPriority="high" />
+            <img
+              src={`${ASSET_BASE}/images/Gallery1.webp`}
+              alt="School life"
+              width="1600"
+              height="900"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+            />
           </div>
           <div className="gallery-hero__overlay" />
           <div className="gallery-hero__content">
@@ -237,7 +284,7 @@ export function Gallery() {
           </div>
           {lightboxImage ? (
             <div className="lightbox-content">
-              <img src={galleryImageUrl(lightboxImage)} alt={lightboxImage.title} width="1200" height="900" />
+              <img src={galleryImageUrl(lightboxImage)} alt={lightboxImage.title} width="1200" height="900" decoding="async" />
               <div className="lightbox-info">
                 <h3>{lightboxImage.title}</h3>
                 <p>{lightboxImage.desc}</p>
