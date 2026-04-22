@@ -20,16 +20,16 @@ export function Footer() {
             </p>
             <div className="footer__social">
               <a href="https://www.facebook.com/@king.david.school" className="social__link" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                <i className="fab fa-facebook-f" />
+                <i className="fab fa-facebook-f" aria-hidden="true" />
               </a>
               <a href="https://www.tiktok.com/@king.david.school" className="social__link" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
-                <i className="fab fa-tiktok" />
+                <i className="fab fa-tiktok" aria-hidden="true" />
               </a>
               <a href="https://www.instagram.com/@king.david.school" className="social__link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                <i className="fab fa-instagram" />
+                <i className="fab fa-instagram" aria-hidden="true" />
               </a>
               <a href="https://twitter.com/@king.david.school" className="social__link" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                <i className="fab fa-twitter" />
+                <i className="fab fa-twitter" aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -50,11 +50,11 @@ export function Footer() {
             <h3 className="footer__title">Contact Info</h3>
             <ul className="footer__list footer__list--contact">
               <li>
-                <i className="fas fa-map-marker-alt" />
+                <i className="fas fa-map-marker-alt" aria-hidden="true" />
                 <span>{contact.address}</span>
               </li>
               <li>
-                <i className="fas fa-phone-alt" />
+                <i className="fas fa-phone-alt" aria-hidden="true" />
                 <span>
                   <a href={`tel:${contact.phonePrimaryHref}`}>{contact.phonePrimary}</a>
                   <br />
@@ -62,7 +62,7 @@ export function Footer() {
                 </span>
               </li>
               <li>
-                <i className="fas fa-envelope" />
+                <i className="fas fa-envelope" aria-hidden="true" />
                 <a href={`mailto:${contact.email}`}>{contact.email}</a>
               </li>
             </ul>

@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { ASSET_BASE } from '../constants';
 import { galleryCategories, galleryImages, galleryImageUrl, type GalleryImage } from '../data/gallery';
 
 const ITEMS_PER_PAGE = 12;
+
+type GalleryFilter = (typeof galleryCategories)[number]['key'];
+
+function isGalleryFilter(value: string | null): value is GalleryFilter {
+  return Boolean(value && galleryCategories.some((category) => category.key === value));
+}
 
 const videos = [
   {
@@ -49,7 +56,7 @@ function GalleryCard({ image, index, onOpen }: { image: GalleryImage; index: num
     <button className="gallery-item" data-category={image.category} data-index={index} type="button" onClick={() => onOpen(index)}>
       <div className="gallery-category">{categoryLabel}</div>
       <div className="gallery-image">
-        <img src={galleryImageUrl(image)} alt={image.title} data-title={image.title} data-date={image.date} loading="lazy" />
+        <img src={galleryImageUrl(image)} alt={image.title} data-title={image.title} data-date={image.date} width="400" height="300" loading="lazy" />
       </div>
       <div className="gallery-overlay">
         <h3>{image.title}</h3>
@@ -64,8 +71,10 @@ function GalleryCard({ image, index, onOpen }: { image: GalleryImage; index: num
 }
 
 export function Gallery() {
-  const [currentFilter, setCurrentFilter] = useState<(typeof galleryCategories)[number]['key']>('all');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterParam = searchParams.get('filter');
+  const currentFilter: GalleryFilter = isGalleryFilter(filterParam) ? filterParam : 'all';
+  const currentPage = Math.max(1, Number.parseInt(searchParams.get('page') ?? '1', 10) || 1);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -78,6 +87,13 @@ export function Gallery() {
   const visibleImages = filteredImages.slice(0, currentPage * ITEMS_PER_PAGE);
   const lightboxImage = lightboxIndex === null ? null : filteredImages[lightboxIndex];
   const totalVisible = Math.min(currentPage * ITEMS_PER_PAGE, filteredImages.length);
+
+  const updateGalleryState = (filter: GalleryFilter, page: number) => {
+    const nextParams = new URLSearchParams();
+    if (filter !== 'all') nextParams.set('filter', filter);
+    if (page > 1) nextParams.set('page', String(page));
+    setSearchParams(nextParams, { replace: false });
+  };
 
   useEffect(() => {
     document.body.style.overflow = lightboxImage || activeVideo ? 'hidden' : '';
@@ -112,9 +128,9 @@ export function Gallery() {
   return (
     <Layout badge="Check Us Now" text="View Our World - Where Your Child's Dreams Begin">
       <main id="main">
-        <section className="gallery-hero">
+        <section className="gallery-hero visible">
           <div className="gallery-hero__image">
-            <img src={`${ASSET_BASE}/images/Gallery1.webp`} alt="School life" loading="eager" />
+            <img src={`${ASSET_BASE}/images/Gallery1.webp`} alt="School life" width="1600" height="900" loading="eager" fetchPriority="high" />
           </div>
           <div className="gallery-hero__overlay" />
           <div className="gallery-hero__content">
@@ -139,8 +155,7 @@ export function Gallery() {
                   key={category.key}
                   type="button"
                   onClick={() => {
-                    setCurrentFilter(category.key);
-                    setCurrentPage(1);
+                    updateGalleryState(category.key, 1);
                     setLightboxIndex(null);
                   }}
                 >
@@ -157,8 +172,8 @@ export function Gallery() {
 
             {totalVisible < filteredImages.length ? (
               <div className="load-more-container" id="loadMoreContainer">
-                <button className="load-more-btn" id="loadMoreBtn" type="button" onClick={() => setCurrentPage((page) => page + 1)}>
-                  Load More Photos <i className="fas fa-arrow-down" />
+                <button className="load-more-btn" id="loadMoreBtn" type="button" onClick={() => updateGalleryState(currentFilter, currentPage + 1)}>
+                  Load More Photos <i className="fas fa-arrow-down" aria-hidden="true" />
                 </button>
               </div>
             ) : null}
@@ -179,12 +194,12 @@ export function Gallery() {
                     <div className="video-placeholder" style={{ backgroundColor: video.tone, color: video.darkText ? '#5a1313' : undefined }}>
                       <span>{video.label}</span>
                     </div>
-                    <div className="play-button-new"><i className="fas fa-play" /></div>
+                    <div className="play-button-new"><i className="fas fa-play" aria-hidden="true" /></div>
                   </div>
                   <div className="video-info-new">
                     <h3>{video.title}</h3>
                     <div className="video-meta">
-                      <span className="duration"><i className="far fa-clock" /> {video.duration}</span>
+                      <span className="duration"><i className="far fa-clock" aria-hidden="true" /> {video.duration}</span>
                     </div>
                     <p>{video.description}</p>
                   </div>
@@ -198,7 +213,7 @@ export function Gallery() {
           if (event.currentTarget === event.target) setLightboxIndex(null);
         }}>
           <button className="lightbox-close" type="button" onClick={() => setLightboxIndex(null)} aria-label="Close image">
-            <i className="fas fa-times" />
+            <i className="fas fa-times" aria-hidden="true" />
           </button>
           <div className="lightbox-nav">
             <button
@@ -208,7 +223,7 @@ export function Gallery() {
               aria-label="Previous image"
               disabled={lightboxIndex === 0}
             >
-              <i className="fas fa-chevron-left" />
+              <i className="fas fa-chevron-left" aria-hidden="true" />
             </button>
             <button
               className="lightbox-next"
@@ -217,12 +232,12 @@ export function Gallery() {
               aria-label="Next image"
               disabled={lightboxIndex === filteredImages.length - 1}
             >
-              <i className="fas fa-chevron-right" />
+              <i className="fas fa-chevron-right" aria-hidden="true" />
             </button>
           </div>
           {lightboxImage ? (
             <div className="lightbox-content">
-              <img src={galleryImageUrl(lightboxImage)} alt={lightboxImage.title} />
+              <img src={galleryImageUrl(lightboxImage)} alt={lightboxImage.title} width="1200" height="900" />
               <div className="lightbox-info">
                 <h3>{lightboxImage.title}</h3>
                 <p>{lightboxImage.desc}</p>
@@ -237,7 +252,7 @@ export function Gallery() {
         }}>
           <div className="video-modal-content">
             <button className="video-modal-close" type="button" onClick={closeVideo} aria-label="Close video">
-              <i className="fas fa-times" />
+              <i className="fas fa-times" aria-hidden="true" />
             </button>
             <video ref={videoRef} controls>
               {activeVideo ? <source src={activeVideo} type="video/mp4" /> : null}

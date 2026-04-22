@@ -14,12 +14,12 @@ export function CountUp({ target, className, duration = 2000 }: CountUpProps) {
   useEffect(() => {
     const element = ref.current;
     if (!element || hasAnimated) return;
+    let frameId = 0;
 
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry?.isIntersecting) return;
 
       setHasAnimated(true);
-      let frameId = 0;
       const startedAt = performance.now();
 
       const tick = (now: number) => {
@@ -32,12 +32,13 @@ export function CountUp({ target, className, duration = 2000 }: CountUpProps) {
 
       frameId = requestAnimationFrame(tick);
       observer.disconnect();
-
-      return () => cancelAnimationFrame(frameId);
     }, { threshold: 0.5 });
 
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frameId);
+    };
   }, [duration, hasAnimated, target]);
 
   return (

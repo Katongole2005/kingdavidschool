@@ -62,32 +62,32 @@ export function Contact() {
 
             <div className="contact-form-wrapper">
               <h2 className="details-title">Send Us a Quick Message</h2>
-              <form className="contact-form" action="https://formspree.io/f/your-form-id" method="POST">
+              <form className="contact-form" action={`mailto:${contact.email}`} method="post" encType="text/plain">
                 <p className="form-description">Have a question? Send a quick message!</p>
 
                 <div className="form-group">
                   <label htmlFor="name">Your Full Name <span className="required">*</span></label>
-                  <input type="text" id="name" name="name" className="form-control" placeholder="Enter your full name" required minLength={3} />
+                  <input type="text" id="name" name="name" className="form-control" placeholder="Enter your full name…" autoComplete="name" required minLength={3} />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="email">Email Address <span className="required">*</span></label>
-                  <input type="email" id="email" name="email" className="form-control" placeholder="Enter a valid email address" required />
+                  <input type="email" id="email" name="email" className="form-control" placeholder="name@example.com…" autoComplete="email" spellCheck={false} required />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="phone">Phone Number</label>
-                  <input type="tel" id="phone" name="phone" className="form-control" placeholder="E.g., +256 7XX XXX XXX" />
+                  <input type="tel" id="phone" name="phone" className="form-control" placeholder="+256 7XX XXX XXX…" autoComplete="tel" inputMode="tel" />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="subject">Subject</label>
-                  <input type="text" id="subject" name="subject" className="form-control" placeholder="Brief subject of your message" />
+                  <input type="text" id="subject" name="subject" className="form-control" placeholder="Brief subject of your message…" autoComplete="off" />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="message">Message <span className="required">*</span></label>
-                  <textarea id="message" name="message" className="form-control" rows={6} placeholder="Type your detailed message here..." required />
+                  <textarea id="message" name="message" className="form-control" rows={6} placeholder="Type your detailed message here…" autoComplete="off" required />
                 </div>
 
                 <div className="form-actions">

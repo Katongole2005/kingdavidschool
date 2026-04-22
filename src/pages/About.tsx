@@ -106,7 +106,7 @@ export function About() {
               </p>
             </div>
             <div className="hero-image-container">
-              <img src={logoUrl} alt="King David School Logo" className="floating-logo" />
+              <img src={logoUrl} alt="King David School Logo" className="floating-logo" width="300" height="300" />
             </div>
           </div>
         </section>
@@ -167,12 +167,12 @@ export function About() {
               <div className={`vmp-card ${principle.className}`} key={principle.title}>
                 <div className="vmp-card__inner">
                   <div className="vmp-icon">
-                    <i className={principle.icon} />
+                    <i className={principle.icon} aria-hidden="true" />
                   </div>
                   <h3>{principle.title}</h3>
                   <p>{principle.text}</p>
                   <div className="vmp-hover-content">
-                    <i className={principle.hoverIcon} />
+                    <i className={principle.hoverIcon} aria-hidden="true" />
                     <span>{principle.hoverText}</span>
                   </div>
                 </div>
@@ -188,7 +188,7 @@ export function About() {
               <div className={`tree-timeline__item tree-timeline__item--${item.align}`} key={item.title}>
                 <div className="tree-timeline__branch" />
                 <div className="tree-timeline__leaf">
-                  <i className={item.icon} />
+                  <i className={item.icon} aria-hidden="true" />
                 </div>
                 <div className="tree-timeline__content">
                   <h3>{item.title}</h3>

@@ -11,19 +11,40 @@ export function Header() {
   const toggleRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLUListElement | null>(null);
   const lastScrollRef = useRef(0);
+  const tickingRef = useRef(false);
+  const scrolledRef = useRef(false);
+  const hiddenRef = useRef(false);
 
   useEffect(() => {
-    const onScroll = () => {
+    const updateHeaderState = () => {
       const currentScroll = window.scrollY;
-      setIsScrolled(currentScroll > 50);
-      setHidden(currentScroll > lastScrollRef.current && currentScroll > 200);
+      const nextScrolled = currentScroll > 50;
+      const nextHidden = currentScroll > lastScrollRef.current && currentScroll > 260 && !isOpen;
+
+      if (nextScrolled !== scrolledRef.current) {
+        scrolledRef.current = nextScrolled;
+        setIsScrolled(nextScrolled);
+      }
+
+      if (nextHidden !== hiddenRef.current) {
+        hiddenRef.current = nextHidden;
+        setHidden(nextHidden);
+      }
+
       lastScrollRef.current = currentScroll;
+      tickingRef.current = false;
+    };
+
+    const onScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      window.requestAnimationFrame(updateHeaderState);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+    updateHeaderState();
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     const updateMenuPosition = () => {

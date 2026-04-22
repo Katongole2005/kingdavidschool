@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { CountUp } from '../components/CountUp';
 import { Layout } from '../components/Layout';
 import { ASSET_BASE } from '../constants';
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 
 const programs = [
   {
@@ -53,7 +54,7 @@ const visionCards = [
 ];
 
 const features = [
-  ['fas fa-chalkboard-teacher', 'Qualified Teachers', 'Our dedicated, experienced educators nurture every child’s potential.'],
+  ['fas fa-chalkboard-teacher', 'Qualified Teachers', "Our dedicated, experienced educators nurture every child's potential."],
   ['fas fa-laptop', 'Modern Classrooms', 'Interactive learning spaces equipped with current technology.'],
   ['fas fa-futbol', 'Sports & Clubs', 'Wide range of extracurricular activities for holistic growth.'],
   ['fas fa-bus', 'Safe Transport', 'Reliable, supervised school transport for peace of mind.'],
@@ -63,7 +64,7 @@ const features = [
 
 const testimonials = [
   {
-    text: 'King David nurtured my daughter’s curiosity. Now she leads confidently. The teachers are incredibly supportive and truly care about each child’s growth.',
+    text: "King David nurtured my daughter's curiosity. Now she leads confidently. The teachers are incredibly supportive and truly care about each child's growth.",
     image: `${ASSET_BASE}/images/staff2.webp`,
     name: 'Mr. Akeny Douglas',
     role: 'Parent',
@@ -125,7 +126,7 @@ function TestimonialSlider() {
             </div>
             <p className="testimonial-card__text">"{testimonial.text}"</p>
             <div className="testimonial-card__author">
-              <img src={testimonial.image} alt={testimonial.name} className="testimonial-card__image" loading="lazy" />
+              <img src={testimonial.image} alt={testimonial.name} className="testimonial-card__image" width="70" height="70" loading="lazy" />
               <div className="testimonial-card__info">
                 <strong>{testimonial.name}</strong>
                 <span>{testimonial.role}</span>
@@ -153,21 +154,33 @@ function TestimonialSlider() {
 export function Home() {
   const heroImageRef = useRef<HTMLImageElement | null>(null);
   const heroContentRef = useRef<HTMLDivElement | null>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const tickingRef = useRef(false);
 
   useEffect(() => {
-    const onScroll = () => {
+    if (prefersReducedMotion) return;
+
+    const updateParallax = () => {
       const scrolled = window.scrollY;
-      if (heroImageRef.current) {
-        heroImageRef.current.style.transform = `translateY(${scrolled * 0.3}px) scale(1.05)`;
-      }
-      if (heroContentRef.current) {
-        heroContentRef.current.style.transform = `translateY(${scrolled * 0.1}px)`;
-      }
+      heroImageRef.current?.style.setProperty('--parallax-y', `${Math.min(scrolled * 0.12, 90)}px`);
+      heroContentRef.current?.style.setProperty('--parallax-y', `${Math.min(scrolled * 0.06, 42)}px`);
+      tickingRef.current = false;
+    };
+
+    const onScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      window.requestAnimationFrame(updateParallax);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    updateParallax();
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      heroImageRef.current?.style.removeProperty('--parallax-y');
+      heroContentRef.current?.style.removeProperty('--parallax-y');
+    };
+  }, [prefersReducedMotion]);
 
   return (
     <Layout badge="Welcome to King David Day & Boarding Primary & Kindergarten School">
@@ -180,7 +193,10 @@ export function Home() {
               src={`${ASSET_BASE}/images/index/maroon.webp`}
               alt="Students learning at King David School"
               className="hero__image"
+              width="1600"
+              height="1000"
               loading="eager"
+              fetchPriority="high"
             />
           </div>
 
@@ -300,7 +316,7 @@ export function Home() {
               </div>
 
               <div className="vision__image">
-                <img src={`${ASSET_BASE}/images/index/All.webp`} alt="Students learning together" loading="lazy" className="vision__img" />
+                <img src={`${ASSET_BASE}/images/index/All.webp`} alt="Students learning together" width="900" height="650" loading="lazy" className="vision__img" />
                 <div className="vision__stats-card">
                   <div className="stats-mini">
                     <div className="stats-mini__item">
