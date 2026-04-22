@@ -229,15 +229,15 @@ export function Home() {
 
               <div className="hero__stats">
                 <div className="stat-item">
-                  <CountUp target={500} className="stat-number" />
+                  <CountUp target={500} suffix="+" className="stat-number" ariaLabel="More than 500 happy students" />
                   <span className="stat-label">Happy Students</span>
                 </div>
                 <div className="stat-item">
-                  <CountUp target={19} className="stat-number" />
+                  <CountUp target={19} className="stat-number" ariaLabel="19 years of excellence" />
                   <span className="stat-label">Years Excellence</span>
                 </div>
                 <div className="stat-item">
-                  <CountUp target={50} className="stat-number" />
+                  <CountUp target={50} suffix="+" className="stat-number" ariaLabel="More than 50 expert teachers" />
                   <span className="stat-label">Expert Teachers</span>
                 </div>
               </div>
