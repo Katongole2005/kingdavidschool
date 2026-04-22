@@ -1,0 +1,27 @@
+button.gallery-item,
+button.video-card-new {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: inherit;
+  width: 100%;
+}
+
+.dot {
+  appearance: none;
+  border: 0;
+  padding: 0;
+}
+
+button.gallery-item:focus-visible,
+button.video-card-new:focus-visible,
+.dot:focus-visible,
+.filter-btn:focus-visible,
+.load-more-btn:focus-visible {
+  outline: 3px solid var(--brand-accent);
+  outline-offset: 4px;
+}

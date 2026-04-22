@@ -1,0 +1,251 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Layout } from '../components/Layout';
+import { ASSET_BASE } from '../constants';
+import { galleryCategories, galleryImages, galleryImageUrl, type GalleryImage } from '../data/gallery';
+
+const ITEMS_PER_PAGE = 12;
+
+const videos = [
+  {
+    src: `${ASSET_BASE}/Videos/Vid1.mp4`,
+    label: 'Primary Six',
+    title: 'Primary Six Class Studies',
+    duration: '20 seconds',
+    description: 'Primary students engaging in their learning activities.',
+    tone: '#8b1e1e',
+  },
+  {
+    src: `${ASSET_BASE}/Videos/Vid2.mp4`,
+    label: 'Playground',
+    title: 'Lower Section Playground Activity',
+    duration: '49 seconds',
+    description: 'Our little ones engaging in a wonderful play time moment.',
+    tone: '#f4c542',
+    darkText: true,
+  },
+  {
+    src: `${ASSET_BASE}/Videos/Vid3.mp4`,
+    label: 'Primary One Students',
+    title: 'Primary One Students',
+    duration: '34 seconds',
+    description: 'Our previous Top Class graduates in their new Primary One class.',
+    tone: '#8b1e1e',
+  },
+  {
+    src: `${ASSET_BASE}/Videos/Vid4.mp4`,
+    label: 'School Events',
+    title: 'School Events & Activities',
+    duration: 'Video',
+    description: 'Highlights from our latest school events and extracurricular activities.',
+    tone: '#f4c542',
+    darkText: true,
+  },
+];
+
+function GalleryCard({ image, index, onOpen }: { image: GalleryImage; index: number; onOpen: (index: number) => void }) {
+  const categoryLabel = image.category.charAt(0).toUpperCase() + image.category.slice(1);
+
+  return (
+    <button className="gallery-item" data-category={image.category} data-index={index} type="button" onClick={() => onOpen(index)}>
+      <div className="gallery-category">{categoryLabel}</div>
+      <div className="gallery-image">
+        <img src={galleryImageUrl(image)} alt={image.title} data-title={image.title} data-date={image.date} loading="lazy" />
+      </div>
+      <div className="gallery-overlay">
+        <h3>{image.title}</h3>
+        <p>{image.desc}</p>
+      </div>
+      <div className="gallery-info">
+        <div className="gallery-date">{image.date}</div>
+        <p>{image.desc}</p>
+      </div>
+    </button>
+  );
+}
+
+export function Gallery() {
+  const [currentFilter, setCurrentFilter] = useState<(typeof galleryCategories)[number]['key']>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const filteredImages = useMemo(() => {
+    if (currentFilter === 'all') return galleryImages;
+    return galleryImages.filter((image) => image.category === currentFilter);
+  }, [currentFilter]);
+
+  const visibleImages = filteredImages.slice(0, currentPage * ITEMS_PER_PAGE);
+  const lightboxImage = lightboxIndex === null ? null : filteredImages[lightboxIndex];
+  const totalVisible = Math.min(currentPage * ITEMS_PER_PAGE, filteredImages.length);
+
+  useEffect(() => {
+    document.body.style.overflow = lightboxImage || activeVideo ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [activeVideo, lightboxImage]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (lightboxIndex === null) return;
+      if (event.key === 'Escape') setLightboxIndex(null);
+      if (event.key === 'ArrowRight') setLightboxIndex((index) => (index === null ? index : Math.min(index + 1, filteredImages.length - 1)));
+      if (event.key === 'ArrowLeft') setLightboxIndex((index) => (index === null ? index : Math.max(index - 1, 0)));
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [filteredImages.length, lightboxIndex]);
+
+  useEffect(() => {
+    if (!activeVideo || !videoRef.current) return;
+    videoRef.current.load();
+    videoRef.current.play().catch(() => undefined);
+  }, [activeVideo]);
+
+  const closeVideo = () => {
+    videoRef.current?.pause();
+    setActiveVideo(null);
+  };
+
+  return (
+    <Layout badge="Check Us Now" text="View Our World - Where Your Child's Dreams Begin">
+      <main id="main">
+        <section className="gallery-hero">
+          <div className="gallery-hero__image">
+            <img src={`${ASSET_BASE}/images/Gallery1.webp`} alt="School life" loading="eager" />
+          </div>
+          <div className="gallery-hero__overlay" />
+          <div className="gallery-hero__content">
+            <h1 className="gallery-hero__title">Our <span>Gallery</span></h1>
+            <p className="gallery-hero__subtitle">Moments that tell our story</p>
+          </div>
+        </section>
+
+        <div className="container">
+          <div className="photo-counter">
+            Showing <span id="visibleCount">{totalVisible} of {filteredImages.length} photos</span>
+          </div>
+        </div>
+
+        <section className="section">
+          <div className="container">
+            <div className="gallery-filter">
+              {galleryCategories.map((category) => (
+                <button
+                  className={`filter-btn${currentFilter === category.key ? ' active' : ''}`}
+                  data-filter={category.key}
+                  key={category.key}
+                  type="button"
+                  onClick={() => {
+                    setCurrentFilter(category.key);
+                    setCurrentPage(1);
+                    setLightboxIndex(null);
+                  }}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="gallery-grid" id="galleryGrid">
+              {visibleImages.map((image, index) => (
+                <GalleryCard image={image} index={index} key={`${image.folder}${image.filename}`} onOpen={setLightboxIndex} />
+              ))}
+            </div>
+
+            {totalVisible < filteredImages.length ? (
+              <div className="load-more-container" id="loadMoreContainer">
+                <button className="load-more-btn" id="loadMoreBtn" type="button" onClick={() => setCurrentPage((page) => page + 1)}>
+                  Load More Photos <i className="fas fa-arrow-down" />
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        <section className="video-gallery-new">
+          <div className="container">
+            <div className="section-header">
+              <h2>Video <span>Gallery</span></h2>
+              <p className="lead">Watch our school come to life - click to play</p>
+            </div>
+
+            <div className="video-grid-new">
+              {videos.map((video) => (
+                <button className="video-card-new" key={video.src} type="button" data-video={video.src} onClick={() => setActiveVideo(video.src)}>
+                  <div className="video-thumbnail">
+                    <div className="video-placeholder" style={{ backgroundColor: video.tone, color: video.darkText ? '#5a1313' : undefined }}>
+                      <span>{video.label}</span>
+                    </div>
+                    <div className="play-button-new"><i className="fas fa-play" /></div>
+                  </div>
+                  <div className="video-info-new">
+                    <h3>{video.title}</h3>
+                    <div className="video-meta">
+                      <span className="duration"><i className="far fa-clock" /> {video.duration}</span>
+                    </div>
+                    <p>{video.description}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <div className={`lightbox${lightboxImage ? ' active' : ''}`} onClick={(event) => {
+          if (event.currentTarget === event.target) setLightboxIndex(null);
+        }}>
+          <button className="lightbox-close" type="button" onClick={() => setLightboxIndex(null)} aria-label="Close image">
+            <i className="fas fa-times" />
+          </button>
+          <div className="lightbox-nav">
+            <button
+              className="lightbox-prev"
+              type="button"
+              onClick={() => setLightboxIndex((index) => (index === null ? index : Math.max(index - 1, 0)))}
+              aria-label="Previous image"
+              disabled={lightboxIndex === 0}
+            >
+              <i className="fas fa-chevron-left" />
+            </button>
+            <button
+              className="lightbox-next"
+              type="button"
+              onClick={() => setLightboxIndex((index) => (index === null ? index : Math.min(index + 1, filteredImages.length - 1)))}
+              aria-label="Next image"
+              disabled={lightboxIndex === filteredImages.length - 1}
+            >
+              <i className="fas fa-chevron-right" />
+            </button>
+          </div>
+          {lightboxImage ? (
+            <div className="lightbox-content">
+              <img src={galleryImageUrl(lightboxImage)} alt={lightboxImage.title} />
+              <div className="lightbox-info">
+                <h3>{lightboxImage.title}</h3>
+                <p>{lightboxImage.desc}</p>
+                <div className="gallery-date">{lightboxImage.date}</div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className={`video-modal${activeVideo ? ' active' : ''}`} onClick={(event) => {
+          if (event.currentTarget === event.target) closeVideo();
+        }}>
+          <div className="video-modal-content">
+            <button className="video-modal-close" type="button" onClick={closeVideo} aria-label="Close video">
+              <i className="fas fa-times" />
+            </button>
+            <video ref={videoRef} controls>
+              {activeVideo ? <source src={activeVideo} type="video/mp4" /> : null}
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </main>
+    </Layout>
+  );
+}

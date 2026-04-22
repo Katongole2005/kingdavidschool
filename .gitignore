@@ -13,6 +13,7 @@ desktop.ini
 # Dependency folders
 node_modules/
 vendor/
+dist/
 
 # Mac metadata
 .Spotlight-V100/
@@ -21,3 +22,4 @@ vendor/
 # Temporary files
 *.tmp
 *.cache
+vite-dev*.log
