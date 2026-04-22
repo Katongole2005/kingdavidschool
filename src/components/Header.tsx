@@ -49,13 +49,12 @@ export function Header() {
   useEffect(() => {
     const updateMenuPosition = () => {
       if (!isOpen) return;
-      const announcements = Array.from(document.querySelectorAll<HTMLElement>('.announcement'));
-      const announcementHeight = announcements.reduce((total, el) => total + el.offsetHeight, 0);
       const headerHeight = headerRef.current?.offsetHeight ?? 0;
-      const topOffset = announcementHeight + headerHeight;
+      const headerBottom = headerRef.current?.getBoundingClientRect().bottom ?? headerHeight;
+      const availableOffset = Math.max(headerHeight, Math.round(headerBottom));
       setMenuStyle({
-        top: `${topOffset}px`,
-        maxHeight: `calc(100vh - ${topOffset}px)`,
+        top: `${headerHeight}px`,
+        maxHeight: `calc(100vh - ${availableOffset}px)`,
       });
     };
 
@@ -95,7 +94,7 @@ export function Header() {
       ref={headerRef}
       className={`site-header${isScrolled ? ' scrolled' : ''}`}
       id="site-header"
-      style={{ transform: hidden ? 'translateY(-100%)' : 'translateY(0)' }}
+      style={hidden ? { transform: 'translateY(-100%)' } : undefined}
     >
       <div className="container">
         <Link to="/" className="brand" aria-label="King David School - Home" onClick={() => setIsOpen(false)}>

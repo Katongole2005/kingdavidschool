@@ -11,23 +11,22 @@ type LayoutProps = {
   showSkipLink?: boolean;
 };
 
-export function Layout({ children, badge, text, showSkipLink = false }: LayoutProps) {
+export function Layout({ children, showSkipLink = false }: LayoutProps) {
   return (
     <>
       {showSkipLink ? <a href="#main" className="skip-link">Skip to main content</a> : null}
-      <Announcement badge={badge} text={text} labelledBy="Admission announcement" />
-      <Header />
       <Announcement
         contained
-        labelledBy="Announcements"
-        badge={<><i className="fas fa-star" aria-hidden="true" /> NEW</>}
-        text="Registration Open for 2026 - Limited Spaces Available!"
+        labelledBy="Admission announcement"
+        badge="Admissions 2026"
+        text="Registration is open for Day & Boarding Primary and Kindergarten."
         cta={(
           <Link to="/contact-us.html" className="announcement__cta">
             Apply Now <i className="fas fa-arrow-right" aria-hidden="true" />
           </Link>
         )}
       />
+      <Header />
       {children}
       <Footer />
     </>
